@@ -2,6 +2,17 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 
+// Загружаем .env без дополнительных зависимостей, чтобы `npm start` работал напрямую.
+const envFile = path.join(__dirname, '.env');
+if (fs.existsSync(envFile)) {
+  for (const line of fs.readFileSync(envFile, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
+    if (!match || line.trimStart().startsWith('#')) continue;
+    const [, key, value] = match;
+    if (process.env[key] === undefined) process.env[key] = value.replace(/^(['\"])(.*)\1$/, '$2');
+  }
+}
+
 const PORT = Number(process.env.PORT || 3000);
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;

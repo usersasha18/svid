@@ -7,31 +7,26 @@
 1. В Telegram откройте своего бота и отправьте ему `/start`.
 2. Получите `chat_id`: откройте `https://api.telegram.org/bot<ВАШ_НОВЫЙ_ТОКЕН>/getUpdates` и найдите `message.chat.id`. Не делитесь ссылкой или ответом: в URL находится токен.
 3. Скопируйте `.env.example` в `.env`, откройте `.env` в редакторе и укажите новый `TELEGRAM_BOT_TOKEN` и свой `TELEGRAM_CHAT_ID`.
-4. В терминале перейдите в папку проекта, затем выполните:
+4. В терминале перейдите в папку проекта и запустите:
 
    ```sh
-   set -a
-   source .env
-   set +a
-   node server.js
+   npm start
    ```
 
+   Сервер сам читает переменные из `.env`; экспортировать `process` или вручную загружать переменные не нужно.
 5. Откройте `http://localhost:3000`. Остановка сервера: `Ctrl+C`.
 
 Если порт 3000 занят, укажите другой в `.env` (например, `PORT=3001`) и откройте соответствующий адрес.
 
 ## Локальный запуск на Windows PowerShell
 
-Создайте `.env` на основе `.env.example`, заполните переменные, затем выполните:
+Создайте `.env` на основе `.env.example`, заполните переменные, затем в PowerShell из папки проекта выполните:
 
 ```powershell
-Get-Content .env | ForEach-Object {
-  if ($_ -match '^\\s*([^#=]+)=(.*)$') {
-    [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), 'Process')
-  }
-}
-node server.js
+npm start
 ```
+
+Сервер автоматически загружает настройки из `.env`.
 
 ## Проверка
 
