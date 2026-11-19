@@ -29,7 +29,16 @@
     .icon { width:41px;height:41px;border-radius:13px;background:#d9a4ff18;border:1px solid #d9a4ff26;display:grid;place-items:center;font-size:20px;margin-bottom:17px; }
     .card h2 { margin:0 0 7px;font-size:16px;font-weight:600; }
     .card p { margin:0;color:#c8b8d1;font-size:13px;line-height:1.55; }
-    .choice { margin:33px auto 0; }
+    .activity-picker { max-width:650px; margin:28px auto 0; }
+    .activity-picker > p { color:#e7d9ec; font-size:15px; margin:0 0 13px; }
+    .activity-options { display:flex; flex-wrap:wrap; justify-content:center; gap:9px; }
+    .activity-option { position:relative; }
+    .activity-option input { position:absolute; opacity:0; width:1px; height:1px; }
+    .activity-option label { display:flex; align-items:center; gap:8px; min-height:40px; padding:0 15px; border-radius:30px; border:1px solid #ffffff30; color:#ddcfe4; background:#ffffff08; font-size:13px; cursor:pointer; transition:.2s; }
+    .activity-option input:checked + label { color:#f8e9ff; background:#d5a5ff24; border-color:#d7a9ff9c; box-shadow:0 0 18px #d7a9ff18; }
+    .activity-option input:focus-visible + label { outline:2px solid #e0b8ff; outline-offset:3px; }
+    .activity-picker .selection-note { margin:10px 0 0; color:#bcaac7; font-size:12px; }
+    .choice { margin:27px auto 0; }
     .choice p { color:#e7d9ec; font-size:15px; margin:0 0 17px; }
     .buttons { height:54px; display:flex;justify-content:center;align-items:center;gap:12px;position:relative; }
     button { font:600 14px 'DM Sans',sans-serif; border-radius:99px; height:48px; padding:0 25px; cursor:pointer; transition:transform .2s,background .2s,box-shadow .2s; }
@@ -65,6 +74,16 @@
         <article class="card"><div class="icon">☕</div><h2>Кофе где-нибудь</h2><p>Найдём симпатичное место, возьмём любимый кофе и поболтаем обо всём.</p></article>
         <article class="card"><div class="icon">🎬</div><h2>Сходим в кино</h2><p>Выберем фильм вместе, а после обсудим его за десертом — или ещё чем-нибудь.</p></article>
       </section>
+      <section class="activity-picker" aria-label="Выбор программы свидания">
+        <p>Что тебе больше нравится?</p>
+        <div class="activity-options">
+          <span class="activity-option"><input type="checkbox" id="plan-home" name="plan" value="Кино и вкусная еда дома"><label for="plan-home">🍿 Кино и ужин дома</label></span>
+          <span class="activity-option"><input type="checkbox" id="plan-coffee" name="plan" value="Кофе в уютном месте"><label for="plan-coffee">☕ Кофе где-нибудь</label></span>
+          <span class="activity-option"><input type="checkbox" id="plan-cinema" name="plan" value="Сходить в кино"><label for="plan-cinema">🎬 Сходить в кино</label></span>
+          <span class="activity-option"><input type="checkbox" id="plan-all" name="plan-all" value="all"><label for="plan-all">✨ Хочу всё!</label></span>
+        </div>
+        <p class="selection-note" id="selection-note" aria-live="polite">Можно выбрать один вариант, несколько или всё сразу</p>
+      </section>
       <div class="choice"><p>Ну что, подаришь мне этот вечер?</p>
         <div class="buttons"><button id="yes">Да, с удовольствием 💜</button><button id="no">Нет 🙈</button></div>
         <div class="hint" id="hint" aria-live="polite"></div>
@@ -78,7 +97,26 @@
     const yes = document.querySelector('#yes');
     const hint = document.querySelector('#hint');
     const modal = document.querySelector('#modal');
+    const planInputs = [...document.querySelectorAll('input[name="plan"]')];
+    const allPlan = document.querySelector('#plan-all');
+    const selectionNote = document.querySelector('#selection-note');
     let locked = false;
+    function selectedPlans() {
+      if (allPlan.checked) return ['Хочу всё: кино и вкусная еда дома, кофе и кинотеатр'];
+      return planInputs.filter(input => input.checked).map(input => input.value);
+    }
+    function updateSelectionNote() {
+      const count = selectedPlans().length;
+      selectionNote.textContent = count ? `Выбрано: ${count === 1 ? selectedPlans()[0] : `${count} варианта`}` : 'Можно выбрать один вариант, несколько или всё сразу';
+    }
+    planInputs.forEach(input => input.addEventListener('change', () => {
+      if (allPlan.checked) allPlan.checked = false;
+      updateSelectionNote();
+    }));
+    allPlan.addEventListener('change', () => {
+      if (allPlan.checked) planInputs.forEach(input => { input.checked = false; });
+      updateSelectionNote();
+    });
     no.addEventListener('click', () => {
       if (locked) return;
       locked = true;
@@ -106,7 +144,7 @@
       try {
         const response = await fetch('/api/answer', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ answer })
+          body: JSON.stringify({ answer, plans: selectedPlans() })
         });
         if (!response.ok) throw new Error('Не удалось отправить ответ');
         return true;

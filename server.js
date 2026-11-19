@@ -27,15 +27,16 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => { raw += chunk; if (raw.length > 4096) req.destroy(); });
     req.on('end', async () => {
       try {
-        const { answer } = JSON.parse(raw || '{}');
+        const { answer, plans = [] } = JSON.parse(raw || '{}');
         const labels = { yes: 'Ответ: ДА 💜', no: 'Ответ: НЕТ 🙈' };
-        if (!labels[answer]) {
+        if (!labels[answer] || !Array.isArray(plans) || plans.length > 3 || plans.some(plan => typeof plan !== 'string' || plan.length > 100)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ error: 'Некорректный ответ' }));
+          return res.end(JSON.stringify({ error: 'Некорректный ответ или выбор свидания' }));
         }
+        const planText = plans.length ? `\nПланы: ${plans.join(', ')}` : '';
         const telegram = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: CHAT_ID, text: `${labels[answer]}\nПриглашение на свидание` })
+          body: JSON.stringify({ chat_id: CHAT_ID, text: `${labels[answer]}\nПриглашение на свидание${planText}` })
         });
         const result = await telegram.json();
         if (!telegram.ok || !result.ok) throw new Error(result.description || 'Telegram API error');
