@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#211331" />
+  <title>У меня есть идея 💜</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+    :root { --ink:#fff8ff; --muted:#cbbbd5; --lilac:#d7a9ff; --pink:#ffb5d8; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); font-family:'DM Sans',sans-serif; background:radial-gradient(ellipse at 50% 2%,#603775 0,transparent 40%), radial-gradient(ellipse at 95% 75%,#392451 0,transparent 38%), linear-gradient(140deg,#170f22,#241532 55%,#17101f); overflow-x:hidden; }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.16; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E"); }
+    .wrap { width:min(1080px,92vw); margin:auto; padding:30px 0 56px; position:relative; }
+    header { display:flex; align-items:center; justify-content:space-between; color:#eadcf0; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+    .brand { display:flex; gap:10px; align-items:center; font-weight:700; }
+    .brand-mark { width:30px;height:30px; border:1px solid #ffffff45; border-radius:50%; display:grid;place-items:center;color:var(--pink);font-size:15px; }
+    .date-tag { border:1px solid #ffffff27; border-radius:40px; padding:9px 14px; color:#d9cbe2; text-transform:none; letter-spacing:0; }
+    main { padding-top:52px; text-align:center; }
+    .eyebrow { color:#e6b9ff; font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; display:flex;align-items:center;justify-content:center;gap:10px; }
+    .eyebrow:before,.eyebrow:after { content:"";width:27px;height:1px;background:#e6b9ff70; }
+    h1 { font-family:'Playfair Display',serif; font-size:clamp(48px,8vw,88px); line-height:1.03; font-weight:500; letter-spacing:-.045em; margin:18px 0 13px; }
+    h1 em { color:#e0b8ff; font-style:normal; }
+    .subtitle { color:var(--muted); font-size:clamp(15px,2.2vw,18px); line-height:1.65; margin:0 auto; max-width:520px; }
+    .activities { max-width:850px; margin:42px auto 0; display:grid; grid-template-columns:repeat(3,1fr); gap:13px; text-align:left; }
+    .card { position:relative; overflow:hidden; min-height:188px; border:1px solid #ffffff17; border-radius:18px; padding:21px 20px 18px; background:linear-gradient(145deg,#ffffff0d,#ffffff04); backdrop-filter:blur(8px); transition:transform .25s,border-color .25s; }
+    .card:hover { transform:translateY(-4px); border-color:#d7a9ff64; }
+    .card:after { content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-42px;bottom:-65px;background:#b86de622;filter:blur(4px); }
+    .icon { width:41px;height:41px;border-radius:13px;background:#d9a4ff18;border:1px solid #d9a4ff26;display:grid;place-items:center;font-size:20px;margin-bottom:17px; }
+    .card h2 { margin:0 0 7px;font-size:16px;font-weight:600; }
+    .card p { margin:0;color:#c8b8d1;font-size:13px;line-height:1.55; }
+    .choice { margin:33px auto 0; }
+    .choice p { color:#e7d9ec; font-size:15px; margin:0 0 17px; }
+    .buttons { height:54px; display:flex;justify-content:center;align-items:center;gap:12px;position:relative; }
+    button { font:600 14px 'DM Sans',sans-serif; border-radius:99px; height:48px; padding:0 25px; cursor:pointer; transition:transform .2s,background .2s,box-shadow .2s; }
+    #yes { color:#291433;border:0;background:linear-gradient(110deg,#f5c2e0,#d8b0ff);box-shadow:0 8px 30px #dba7ff35; }
+    #yes:hover { transform:translateY(-2px);box-shadow:0 10px 36px #dba7ff66; }
+    #no { color:#e8ddeb;background:#ffffff09;border:1px solid #ffffff35; position:relative; }
+    #no:hover { background:#ffffff14; }
+    .hint { min-height:20px;margin-top:12px;color:#bcaac7;font-size:12px; }
+    .foot { margin-top:45px;color:#9d8da8;font-size:12px; }
+    .foot span {color:#df9fc8;}
+    .float { position:fixed; z-index:-1; opacity:.32; animation:drift 8s ease-in-out infinite; user-select:none; }
+    .f1 {top:19%;left:7%;font-size:24px;color:#d99cff}.f2 {right:8%;top:35%;font-size:17px;animation-delay:-2s;color:#ffaed9}.f3{left:12%;bottom:15%;font-size:15px;animation-delay:-4s;color:#e4b3ff}.f4{right:15%;bottom:13%;font-size:24px;animation-delay:-5s;color:#ffaed9}
+    @keyframes drift { 0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-17px) rotate(10deg)} }
+    .modal { position:fixed;inset:0;display:none;place-items:center;padding:20px;background:#100a18cc;backdrop-filter:blur(9px);z-index:10; }
+    .modal.show {display:grid;animation:fade .25s ease;}
+    .modal-box { width:min(430px,100%);text-align:center;padding:38px 30px;border:1px solid #ffffff28;border-radius:25px;background:linear-gradient(145deg,#392348,#24162f);box-shadow:0 25px 90px #08040e99; }
+    .big-heart {font-size:42px;animation:beat 1s infinite}.modal h2 {font:600 34px 'Playfair Display',serif;margin:13px 0 10px}.modal p {color:#d1c0da;line-height:1.65;margin:0 0 23px}.close {border:0;background:#e4b5ff;color:#281334;height:43px;}
+    @keyframes fade{from{opacity:0}to{opacity:1}} @keyframes beat{50%{transform:scale(1.14)}}
+    @media(max-width:650px){.wrap{padding-top:22px}main{padding-top:48px}.activities{grid-template-columns:1fr;max-width:390px;gap:10px;margin-top:30px}.card{min-height:0;padding:15px 16px;display:grid;grid-template-columns:48px 1fr;column-gap:13px;align-items:center}.icon{grid-row:span 2;margin:0}.card h2{align-self:end}.card p{align-self:start}.choice{margin-top:27px}.foot{margin-top:32px}.date-tag{font-size:11px;padding:8px 10px}.float{opacity:.2}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <span class="float f1">✦</span><span class="float f2">♡</span><span class="float f3">✧</span><span class="float f4">♡</span>
+  <div class="wrap">
+    <header><div class="brand"><span class="brand-mark">♡</span> маленькое приглашение</div><div class="date-tag">для тебя · с теплом</div></header>
+    <main>
+      <div class="eyebrow">есть одна идея</div>
+      <h1>Давай устроим<br><em>свидание?</em></h1>
+      <p class="subtitle">Хочу провести с тобой уютный вечер — без спешки, с хорошей едой и ещё лучшей компанией 💜</p>
+      <section class="activities" aria-label="Идеи для свидания">
+        <article class="card"><div class="icon">🍿</div><h2>Кино и уют дома</h2><p>Закажем что-нибудь вкусное, устроимся поудобнее и вместе выберем фильм.</p></article>
+        <article class="card"><div class="icon">☕</div><h2>Кофе где-нибудь</h2><p>Найдём симпатичное место, возьмём любимый кофе и поболтаем обо всём.</p></article>
+        <article class="card"><div class="icon">🎬</div><h2>Сходим в кино</h2><p>Выберем фильм вместе, а после обсудим его за десертом — или ещё чем-нибудь.</p></article>
+      </section>
+      <div class="choice"><p>Ну что, подаришь мне этот вечер?</p>
+        <div class="buttons"><button id="yes">Да, с удовольствием 💜</button><button id="no">Нет 🙈</button></div>
+        <div class="hint" id="hint" aria-live="polite"></div>
+      </div>
+      <div class="foot">Время, место и фильм <span>выберем вместе</span> ✨</div>
+    </main>
+  </div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-box"><div class="big-heart">💜</div><h2 id="modal-title">Ура!</h2><p>Тогда это свидание уже почти случилось ✨<br>Осталось только выбрать день — и решить, что будем смотреть и есть 😊</p><button class="close" id="close">Уже жду! 💌</button></div></div>
+  <script>
+    const no = document.querySelector('#no');
+    const yes = document.querySelector('#yes');
+    const hint = document.querySelector('#hint');
+    const modal = document.querySelector('#modal');
+    let locked = false;
+    no.addEventListener('click', () => {
+      if (locked) return;
+      locked = true;
+      const bounds = no.getBoundingClientRect();
+      const margin = 18;
+      const maxX = Math.max(margin, window.innerWidth - bounds.width - margin);
+      const maxY = Math.max(margin, window.innerHeight - bounds.height - margin);
+      no.style.position = 'fixed';
+      no.style.left = `${Math.random() * maxX}px`;
+      no.style.top = `${Math.random() * maxY}px`;
+      no.style.zIndex = '5';
+      hint.textContent = 'Ой, кнопка убежала! Подожди 5 секунд — и попробуй снова 😄';
+      no.disabled = true;
+      window.setTimeout(() => {
+        locked = false;
+        no.disabled = false;
+        no.style.position = 'relative';
+        no.style.left = '';
+        no.style.top = '';
+        no.style.zIndex = '';
+        hint.textContent = 'Кнопка вернулась. Теперь можно нажать — если всё ещё хочется 🙃';
+      }, 5000);
+    });
+    async function sendAnswer(answer) {
+      try {
+        const response = await fetch('/api/answer', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answer })
+        });
+        if (!response.ok) throw new Error('Не удалось отправить ответ');
+        return true;
+      } catch (error) {
+        hint.textContent = 'Не получилось отправить ответ. Попробуй ещё раз чуть позже 💌';
+        return false;
+      }
+    }
+    yes.addEventListener('click', async () => {
+      yes.disabled = true;
+      modal.classList.add('show');
+      await sendAnswer('yes');
+      yes.disabled = false;
+    });
+    no.addEventListener('click', () => { void sendAnswer('no'); });
+    document.querySelector('#close').addEventListener('click', () => modal.classList.remove('show'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('show'); });
+  </script>
+</body>
+</html>
