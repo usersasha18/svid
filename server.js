@@ -27,16 +27,20 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => { raw += chunk; if (raw.length > 4096) req.destroy(); });
     req.on('end', async () => {
       try {
-        const { answer, plans = [] } = JSON.parse(raw || '{}');
+        const { answer, plans = [], dateTime = '' } = JSON.parse(raw || '{}');
         const labels = { yes: 'Ответ: ДА 💜', no: 'Ответ: НЕТ 🙈' };
-        if (!labels[answer] || !Array.isArray(plans) || plans.length > 3 || plans.some(plan => typeof plan !== 'string' || plan.length > 100)) {
+        const validDateTime = typeof dateTime === 'string' && /^\d{4}-\d{2}-\d{2}T(?:18|19|20|21|22|23):[0-5]\d$/.test(dateTime);
+        const selectedDate = validDateTime ? new Date(`${dateTime.slice(0, 10)}T00:00:00Z`) : null;
+        const validSunday = selectedDate && !Number.isNaN(selectedDate.getTime()) && selectedDate.toISOString().slice(0, 10) === dateTime.slice(0, 10) && selectedDate.getUTCDay() === 0;
+        if (!labels[answer] || !Array.isArray(plans) || plans.length > 3 || plans.some(plan => typeof plan !== 'string' || plan.length > 100) || (answer === 'yes' && !validSunday) || (dateTime && !validSunday)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ error: 'Некорректный ответ или выбор свидания' }));
+          return res.end(JSON.stringify({ error: 'Некорректный ответ, дата или выбор свидания' }));
         }
+        const dateText = validSunday ? `\nВремя: ${new Date(`${dateTime}:00+10:00`).toLocaleString('ru-RU', { timeZone: 'Asia/Vladivostok', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })} (Владивосток)` : '';
         const planText = plans.length ? `\nПланы: ${plans.join(', ')}` : '';
         const telegram = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: CHAT_ID, text: `${labels[answer]}\nПриглашение на свидание${planText}` })
+          body: JSON.stringify({ chat_id: CHAT_ID, text: `${labels[answer]}\nПриглашение на свидание${dateText}${planText}` })
         });
         const result = await telegram.json();
         if (!telegram.ok || !result.ok) throw new Error(result.description || 'Telegram API error');

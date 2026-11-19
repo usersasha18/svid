@@ -38,6 +38,10 @@
     .activity-option input:checked + label { color:#f8e9ff; background:#d5a5ff24; border-color:#d7a9ff9c; box-shadow:0 0 18px #d7a9ff18; }
     .activity-option input:focus-visible + label { outline:2px solid #e0b8ff; outline-offset:3px; }
     .activity-picker .selection-note { margin:10px 0 0; color:#bcaac7; font-size:12px; }
+    .time-picker { max-width:500px; margin:20px auto 0; }
+    .time-picker label { display:block; color:#e7d9ec; font-size:14px; margin-bottom:10px; }
+    .time-picker input { color:#fff8ff; font:500 15px 'DM Sans',sans-serif; padding:11px 15px; border:1px solid #ffffff35; border-radius:13px; background:#ffffff0b; color-scheme:dark; }
+    .time-picker .selection-note { margin:9px 0 0; color:#bcaac7; font-size:12px; }
     .choice { margin:27px auto 0; }
     .choice p { color:#e7d9ec; font-size:15px; margin:0 0 17px; }
     .buttons { height:54px; display:flex;justify-content:center;align-items:center;gap:12px;position:relative; }
@@ -84,6 +88,11 @@
         </div>
         <p class="selection-note" id="selection-note" aria-live="polite">Можно выбрать один вариант, несколько или всё сразу</p>
       </section>
+      <section class="time-picker" aria-label="Выбор времени свидания">
+        <label for="date-time">Когда тебе удобно в воскресенье?</label>
+        <input id="date-time" type="datetime-local" />
+        <p class="selection-note" id="time-note" aria-live="polite">Выбери воскресенье после 18:00</p>
+      </section>
       <div class="choice"><p>Ну что, подаришь мне этот вечер?</p>
         <div class="buttons"><button id="yes">Да, с удовольствием 💜</button><button id="no">Нет 🙈</button></div>
         <div class="hint" id="hint" aria-live="polite"></div>
@@ -100,6 +109,28 @@
     const planInputs = [...document.querySelectorAll('input[name="plan"]')];
     const allPlan = document.querySelector('#plan-all');
     const selectionNote = document.querySelector('#selection-note');
+    const dateTimeInput = document.querySelector('#date-time');
+    const timeNote = document.querySelector('#time-note');
+    const nextSunday = new Date();
+    nextSunday.setDate(nextSunday.getDate() + ((7 - nextSunday.getDay()) % 7 || 7));
+    nextSunday.setHours(18, 0, 0, 0);
+    const datePart = `${nextSunday.getFullYear()}-${String(nextSunday.getMonth() + 1).padStart(2, '0')}-${String(nextSunday.getDate()).padStart(2, '0')}`;
+    dateTimeInput.min = `${datePart}T18:00`;
+    dateTimeInput.max = `${datePart}T23:59`;
+    dateTimeInput.required = true;
+    dateTimeInput.addEventListener('change', () => {
+      const value = dateTimeInput.value;
+      if (!value) { timeNote.textContent = 'Выбери воскресенье после 18:00'; return; }
+      const picked = new Date(value);
+      const valid = picked.getDay() === 0 && (picked.getHours() > 18 || (picked.getHours() === 18 && picked.getMinutes() >= 0));
+      if (!valid) {
+        dateTimeInput.setCustomValidity('Выбери воскресенье и время не раньше 18:00');
+        timeNote.textContent = 'Нужно выбрать воскресенье после 18:00 💜';
+      } else {
+        dateTimeInput.setCustomValidity('');
+        timeNote.textContent = `Отлично, записал: ${picked.toLocaleString('ru-RU', { weekday: 'long', hour: '2-digit', minute: '2-digit' })} ✨`;
+      }
+    });
     let locked = false;
     function selectedPlans() {
       if (allPlan.checked) return ['Хочу всё: кино и вкусная еда дома, кофе и кинотеатр'];
@@ -144,7 +175,7 @@
       try {
         const response = await fetch('/api/answer', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ answer, plans: selectedPlans() })
+          body: JSON.stringify({ answer, plans: selectedPlans(), dateTime: dateTimeInput.value })
         });
         if (!response.ok) throw new Error('Не удалось отправить ответ');
         return true;
@@ -154,6 +185,13 @@
       }
     }
     yes.addEventListener('click', async () => {
+      if (!dateTimeInput.value) {
+        dateTimeInput.setCustomValidity('Выбери воскресенье после 18:00');
+        dateTimeInput.reportValidity();
+        return;
+      }
+      dateTimeInput.dispatchEvent(new Event('change'));
+      if (!dateTimeInput.checkValidity()) { dateTimeInput.reportValidity(); return; }
       yes.disabled = true;
       modal.classList.add('show');
       await sendAnswer('yes');
