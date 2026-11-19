@@ -7,8 +7,16 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const ROOT = __dirname;
 
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  console.error('PORT должен быть числом от 1 до 65535.');
+  process.exit(1);
+}
+if (typeof fetch !== 'function') {
+  console.error('Требуется Node.js 18 или новее (встроенный fetch).');
+  process.exit(1);
+}
 if (!BOT_TOKEN || !CHAT_ID) {
-  console.error('Заполните TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в переменных окружения.');
+  console.error('Создайте .env по образцу .env.example и задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID.');
   process.exit(1);
 }
 
